@@ -20,14 +20,14 @@ html, body {
 
 #header {
   background: #2d2d2d; color: #e8ddd0;
-  padding: 10px 14px;
+  padding: 8px 10px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 3px solid #8a6a4a;
   flex-shrink: 0;
 }
-.title { font-size: 15px; font-weight: bold; letter-spacing: 2px; }
-.sub   { font-size: 9px; color: #a0907a; margin-top: 2px; }
-.hbtns { display: flex; gap: 8px; }
+.title { font-size: 13px; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
+.sub   { font-size: 8px; color: #a0907a; margin-top: 1px; white-space: nowrap; }
+.hbtns { display: flex; gap: 6px; flex-shrink: 0; }
 button {
   font-family: Georgia, serif;
   cursor: pointer;
@@ -36,7 +36,8 @@ button {
 .hbtn {
   background: transparent; color: #e8ddd0;
   border: 1px solid #6a6a6a;
-  padding: 7px 14px; border-radius: 4px; font-size: 13px;
+  padding: 6px 8px; border-radius: 4px; font-size: 11px;
+  white-space: nowrap;
 }
 .hbtn.g { border-color: #4a8a4a; }
 
