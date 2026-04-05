@@ -241,7 +241,7 @@ function drawLabels() {
   div2.id = 'clabels';
   div2.style.cssText = 'display:flex;margin-top:3px;';
   for (var c=0;c<COLS;c++) {
-    var n2 = c+1;
+    var n2 = COLS - c; // 右から1
     var d2 = document.createElement('div');
     d2.style.cssText = 'width:'+CS+'px;text-align:center;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;overflow:hidden;';
     d2.textContent = (n2%5===0||n2===1) ? n2 : '';
@@ -429,7 +429,7 @@ document.getElementById('btn-png').addEventListener('click', function() {
   c2.fillStyle='#8a6a4a'; c2.font='10px monospace'; c2.textAlign='left';
   for(var r2=0;r2<ROWS;r2++){var n=ROWS-r2;if(n%5===0||n===1||n===ROWS)c2.fillText(n,ox+COLS*cs+3,oy+r2*cs+cs/2+3);}
   c2.textAlign='center';
-  for(var cc=0;cc<COLS;cc++){var n2=cc+1;if(n2%5===0||n2===1)c2.fillText(n2,ox+cc*cs+cs/2,oy+ROWS*cs+12);}
+  for(var cc=0;cc<COLS;cc++){var n2=COLS-cc;if(n2%5===0||n2===1)c2.fillText(n2,ox+cc*cs+cs/2,oy+ROWS*cs+12);}
   var link=document.createElement('a');
   link.download='filet-pattern.png';
   link.href=cvs.toDataURL('image/png');
