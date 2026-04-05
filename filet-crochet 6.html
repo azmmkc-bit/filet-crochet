@@ -13,91 +13,83 @@ html, body {
   width: 100%; height: 100%;
   background: #f5f2ed;
   font-family: Georgia, serif;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   display: flex; flex-direction: column;
 }
+button { font-family: Georgia, serif; cursor: pointer; -webkit-appearance: none; }
 
+/* ── ヘッダー ── */
 #header {
   background: #2d2d2d; color: #e8ddd0;
   padding: 8px 10px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 3px solid #8a6a4a;
   flex-shrink: 0;
+  min-height: 0;
 }
-.title { font-size: 13px; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
-.sub   { font-size: 8px; color: #a0907a; margin-top: 1px; white-space: nowrap; }
-.hbtns { display: flex; gap: 6px; flex-shrink: 0; }
-button {
-  font-family: Georgia, serif;
-  cursor: pointer;
-  -webkit-appearance: none;
-}
+.htitle { font-size: 13px; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
+.hsub   { font-size: 8px; color: #a0907a; margin-top: 1px; white-space: nowrap; }
+.hbtns  { display: flex; gap: 5px; flex-shrink: 0; margin-left: 8px; }
 .hbtn {
   background: transparent; color: #e8ddd0;
   border: 1px solid #6a6a6a;
-  padding: 6px 8px; border-radius: 4px; font-size: 11px;
+  padding: 5px 8px; border-radius: 4px; font-size: 11px;
   white-space: nowrap;
 }
 .hbtn.g { border-color: #4a8a4a; }
+.hbtn.r { border-color: #6a6a9a; }
 
+/* ── ツールバー ── */
 #toolbar {
   background: #ede8e0; border-bottom: 1px solid #c8b8a0;
-  padding: 8px 12px;
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 7px 10px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;
   flex-shrink: 0;
 }
-.tlabel { font-size: 10px; color: #8a6a4a; letter-spacing: 1px; }
-.tgrp   { display: flex; align-items: center; gap: 6px; }
-
-.cbtn {
-  width: 38px; height: 38px; border-radius: 6px;
-  border: 2.5px solid #c8b8a0;
-}
-.cbtn.on { border-color: #8a6a4a; box-shadow: 0 0 0 2px rgba(138,106,74,0.35); }
+.tlabel { font-size: 10px; color: #8a6a4a; letter-spacing: 1px; white-space: nowrap; }
+.tgrp   { display: flex; align-items: center; gap: 5px; }
+.cbtn { width: 34px; height: 34px; border-radius: 5px; border: 2.5px solid #c8b8a0; flex-shrink: 0; }
+.cbtn.on { border-color: #8a6a4a; box-shadow: 0 0 0 2px rgba(138,106,74,0.3); }
 #b-black { background: #1a1a1a; }
 #b-white { background: #ffffff; }
 #b-gray  { background: #a0a0a0; }
-
 .zbtn {
-  width: 36px; height: 36px; background: #fff;
-  border: 1px solid #c8b8a0; border-radius: 5px;
-  font-size: 20px; color: #3a3a3a;
+  width: 32px; height: 32px; background: #fff;
+  border: 1px solid #c8b8a0; border-radius: 4px;
+  font-size: 18px; color: #3a3a3a;
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-#zval { font-size: 12px; color: #5a4a3a; min-width: 40px; text-align: center; font-family: monospace; }
-#sc-wrap { margin-left: auto; font-size: 11px; color: #5a4a3a; }
-#sc-val  { font-size: 18px; font-weight: bold; color: #2d2d2d; }
+#zval { font-size: 11px; color: #5a4a3a; min-width: 36px; text-align: center; font-family: monospace; white-space: nowrap; }
+#sc-wrap { margin-left: auto; font-size: 11px; color: #5a4a3a; white-space: nowrap; }
+#sc-val  { font-size: 17px; font-weight: bold; color: #2d2d2d; }
 
+/* ── サイズバー ── */
 #sizebar {
   background: #e8e0d4; border-bottom: 1px solid #c8b8a0;
-  padding: 6px 12px;
-  display: flex; align-items: center; gap: 10px;
-  flex-shrink: 0; font-size: 12px; color: #5a4a3a;
+  padding: 5px 10px;
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0; font-size: 12px; color: #5a4a3a; flex-wrap: nowrap;
 }
 #sizebar input {
-  width: 52px; padding: 4px 6px;
-  border: 1px solid #c8b8a0; border-radius: 3px; font-size: 13px;
+  width: 48px; padding: 3px 5px;
+  border: 1px solid #c8b8a0; border-radius: 3px; font-size: 12px;
 }
-#sizebar .abtn {
+.abtn {
   background: #5a5a8a; color: #fff; border: none;
-  padding: 6px 14px; border-radius: 3px; font-size: 12px;
+  padding: 5px 10px; border-radius: 3px; font-size: 12px; white-space: nowrap;
 }
 
+/* ── グリッドエリア（ここだけスクロール） ── */
 #canvas-wrap {
-  min-width: 0;
   flex: 1;
-  overflow: auto;
+  overflow: scroll;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x pan-y;
-  overflow-x: auto;
-  overflow-y: auto;
   background: #f5f2ed;
-  padding: 16px 24px 24px 38px;
+  padding: 16px 24px 32px 38px;
   position: relative;
 }
 canvas#grid {
-  max-width: none;
   display: block;
   touch-action: none;
 }
@@ -107,13 +99,13 @@ canvas#grid {
 
 <div id="header">
   <div>
-    <div class="title">方眼編み図エディタ</div>
-    <div class="sub">FILET CROCHET CHART EDITOR</div>
+    <div class="htitle">方眼編み図エディタ</div>
+    <div class="hsub">FILET CROCHET CHART EDITOR</div>
   </div>
   <div class="hbtns">
     <button class="hbtn" id="btn-clear">クリア</button>
     <button class="hbtn g" id="btn-png">PNG保存</button>
-    <button class="hbtn" id="btn-reload" style="border-color:#6a6a9a;">再読込</button>
+    <button class="hbtn r" id="btn-reload">再読込</button>
   </div>
 </div>
 
@@ -129,15 +121,15 @@ canvas#grid {
     <button class="zbtn" id="btn-zm">−</button>
     <div id="zval">100%</div>
     <button class="zbtn" id="btn-zp">＋</button>
-    <button class="zbtn" style="font-size:13px" id="btn-fit">⊡</button>
+    <button class="zbtn" style="font-size:12px" id="btn-fit">⊡</button>
   </div>
   <div id="sc-wrap">1段 <span id="sc-val">—</span> 目</div>
 </div>
 
 <div id="sizebar">
   <span class="tlabel">サイズ</span>
-  <label>段数 <input type="number" id="inp-r" min="3" max="100" value="20"></label>
-  <label>目数 <input type="number" id="inp-c" min="3" max="100" value="20"></label>
+  <label>段数 <input type="number" id="inp-r" min="3" max="200" value="20"></label>
+  <label>目数 <input type="number" id="inp-c" min="3" max="200" value="20"></label>
   <button class="abtn" id="btn-apply">適用</button>
 </div>
 
@@ -146,311 +138,291 @@ canvas#grid {
 </div>
 
 <script>
-// ── 定数・状態 ─────────────────────────────────────
 var ZOOM = [10,14,18,22,28,34,42,52,64];
-var zi = 4; // 28px = 100%
+var zi = 4;
 var CS = ZOOM[zi];
 var ROWS = 20, COLS = 20;
 var COLORS = { white:'#ffffff', black:'#1a1a1a', gray:'#a0a0a0' };
 var grid = [];
 var paint = 'black';
-var drawing = false, drawMode = null;
-var lastRC = null;
-
-// pinch
+var drawing = false, drawMode = null, lastRC = null;
 var pinching = false, p0dist = 0, p0zi = 0;
 
-// ── グリッドデータ ────────────────────────────────
-function makeGrid(r, c) {
-  var g = [];
-  for (var i=0;i<r;i++){ var row=[]; for(var j=0;j<c;j++) row.push('white'); g.push(row); }
-  return g;
-}
-
-// ── Canvas描画 ────────────────────────────────────
 var canvas = document.getElementById('grid');
 var ctx = canvas.getContext('2d');
 
-function draw() {
-  var w = COLS * CS;
-  var h = ROWS * CS;
-  canvas.width  = w;
-  canvas.height = h;
-  canvas.style.width  = w + 'px';
-  canvas.style.height = h + 'px';
-  document.getElementById('canvas-wrap').style.minWidth = (w + 62) + 'px';
+function makeGrid(r,c){
+  var g=[];
+  for(var i=0;i<r;i++){var row=[];for(var j=0;j<c;j++)row.push('white');g.push(row);}
+  return g;
+}
 
-  // 全体背景
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, w, h);
+function draw(){
+  var w=COLS*CS, h=ROWS*CS;
+  canvas.width=w; canvas.height=h;
+  canvas.style.width=w+'px'; canvas.style.height=h+'px';
 
-  // セル塗り
-  for (var r=0;r<ROWS;r++) {
-    for (var c=0;c<COLS;c++) {
-      var col = grid[r][c];
-      if (col !== 'white') {
-        ctx.fillStyle = COLORS[col];
-        ctx.fillRect(c*CS, r*CS, CS, CS);
+  ctx.fillStyle='#ffffff';
+  ctx.fillRect(0,0,w,h);
+
+  // セル色
+  for(var r=0;r<ROWS;r++)
+    for(var c=0;c<COLS;c++)
+      if(grid[r][c]!=='white'){
+        ctx.fillStyle=COLORS[grid[r][c]];
+        ctx.fillRect(c*CS,r*CS,CS,CS);
       }
-    }
-  }
 
-  // グリッド線
-  ctx.beginPath();
-  for (var c2=0;c2<=COLS;c2++) {
-    var bold = ((COLS - c2) % 5 === 0);
-    ctx.lineWidth = bold ? 1.5 : 0.5;
-    ctx.strokeStyle = bold ? '#8a7a6a' : '#c8b8a0';
+  // 縦線（右から数えて5の倍数で太線）
+  for(var c2=0;c2<=COLS;c2++){
+    var bold=((COLS-c2)%5===0);
+    ctx.strokeStyle=bold?'#8a7a6a':'#c8b8a0';
+    ctx.lineWidth=bold?1.5:0.5;
     ctx.beginPath();
-    ctx.moveTo(c2*CS + 0.5, 0);
-    ctx.lineTo(c2*CS + 0.5, h);
+    ctx.moveTo(c2*CS+0.5,0);
+    ctx.lineTo(c2*CS+0.5,h);
     ctx.stroke();
   }
-  for (var r2=0;r2<=ROWS;r2++) {
-    var bold2 = (r2 % 5 === 0);
-    ctx.lineWidth = bold2 ? 1.5 : 0.5;
-    ctx.strokeStyle = bold2 ? '#8a7a6a' : '#c8b8a0';
+  // 横線（下から数えて5の倍数で太線）
+  for(var r2=0;r2<=ROWS;r2++){
+    var bold2=((ROWS-r2)%5===0);
+    ctx.strokeStyle=bold2?'#8a7a6a':'#c8b8a0';
+    ctx.lineWidth=bold2?1.5:0.5;
     ctx.beginPath();
-    ctx.moveTo(0, r2*CS + 0.5);
-    ctx.lineTo(w, r2*CS + 0.5);
+    ctx.moveTo(0,r2*CS+0.5);
+    ctx.lineTo(w,r2*CS+0.5);
     ctx.stroke();
   }
 
   // 外枠
-  ctx.strokeStyle = '#8a6a4a';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(1, 1, w-2, h-2);
+  ctx.strokeStyle='#8a6a4a'; ctx.lineWidth=2;
+  ctx.strokeRect(1,1,w-2,h-2);
 
   drawLabels();
   updateSC();
 }
 
-function drawLabels() {
-  // 行番号（canvas左にabsolute配置は難しいのでcanvas外のdivで）
-  var wrap = document.getElementById('canvas-wrap');
-  var old = document.getElementById('rlabels');
-  if (old) old.remove();
-  var div = document.createElement('div');
-  div.id = 'rlabels';
-  div.style.cssText = 'position:absolute;left:0;top:16px;width:34px;pointer-events:none;';
-  var fs = Math.max(8, Math.round(CS*0.3));
-  for (var r=0;r<ROWS;r++) {
-    var n = ROWS - r;
-    var d = document.createElement('div');
-    d.style.cssText = 'height:'+CS+'px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;overflow:hidden;';
-    d.textContent = (n%5===0||n===1||n===ROWS) ? n : '';
+function drawLabels(){
+  var wrap=document.getElementById('canvas-wrap');
+  var fs=Math.max(8,Math.round(CS*0.3));
+
+  // 行番号
+  var old=document.getElementById('rlabels');
+  if(old)old.remove();
+  var div=document.createElement('div');
+  div.id='rlabels';
+  div.style.cssText='position:absolute;left:0;top:16px;width:34px;pointer-events:none;';
+  for(var r=0;r<ROWS;r++){
+    var n=ROWS-r;
+    var d=document.createElement('div');
+    d.style.cssText='height:'+CS+'px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;overflow:hidden;';
+    d.textContent=(n%5===0||n===1||n===ROWS)?n:'';
     div.appendChild(d);
   }
   wrap.appendChild(div);
 
-  // 列番号
-  var old2 = document.getElementById('clabels');
-  if (old2) old2.remove();
-  var div2 = document.createElement('div');
-  div2.id = 'clabels';
-  div2.style.cssText = 'display:flex;margin-top:3px;';
-  for (var c=0;c<COLS;c++) {
-    var n2 = COLS - c; // 右から1
-    var d2 = document.createElement('div');
-    d2.style.cssText = 'width:'+CS+'px;text-align:center;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;overflow:hidden;';
-    d2.textContent = (n2%5===0||n2===1) ? n2 : '';
+  // 列番号（右から1）
+  var old2=document.getElementById('clabels');
+  if(old2)old2.remove();
+  var div2=document.createElement('div');
+  div2.id='clabels';
+  div2.style.cssText='display:flex;margin-top:3px;';
+  for(var c=0;c<COLS;c++){
+    var n2=COLS-c;
+    var d2=document.createElement('div');
+    d2.style.cssText='width:'+CS+'px;text-align:center;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;overflow:hidden;';
+    d2.textContent=(n2%5===0||n2===1)?n2:'';
     div2.appendChild(d2);
   }
-  canvas.insertAdjacentElement('afterend', div2);
+  canvas.insertAdjacentElement('afterend',div2);
 }
 
-function updateSC() {
-  document.getElementById('sc-val').textContent = COLS*2+1;
+function updateSC(){
+  document.getElementById('sc-val').textContent=COLS*2+1;
 }
 
-// 1セルだけ再描画（高速化）
-function redrawCell(r, c) {
-  var x = c*CS, y = r*CS;
-  // 背景
-  ctx.fillStyle = COLORS[grid[r][c]];
-  ctx.fillRect(x+1, y+1, CS-1, CS-1);
-  // 線を再描画
-  // 縦線（左・右）
-  var lBold = ((COLS-c)%5===0), rBold = ((COLS-c-1)%5===0);
-  ctx.strokeStyle = lBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=lBold?1.5:0.5;
-  ctx.beginPath(); ctx.moveTo(x+.5,y); ctx.lineTo(x+.5,y+CS); ctx.stroke();
-  ctx.strokeStyle = rBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=rBold?1.5:0.5;
-  ctx.beginPath(); ctx.moveTo(x+CS+.5,y); ctx.lineTo(x+CS+.5,y+CS); ctx.stroke();
-  // 横線（上・下）
-  var tBold = (r%5===0), bBold = ((r+1)%5===0);
-  ctx.strokeStyle = tBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=tBold?1.5:0.5;
-  ctx.beginPath(); ctx.moveTo(x,y+.5); ctx.lineTo(x+CS,y+.5); ctx.stroke();
-  ctx.strokeStyle = bBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=bBold?1.5:0.5;
-  ctx.beginPath(); ctx.moveTo(x,y+CS+.5); ctx.lineTo(x+CS,y+CS+.5); ctx.stroke();
-  // 外枠を守る
-  if (c===0||r===0||c===COLS-1||r===ROWS-1) {
-    ctx.strokeStyle='#8a6a4a'; ctx.lineWidth=2;
+function redrawCell(r,c){
+  var x=c*CS,y=r*CS;
+  ctx.fillStyle=COLORS[grid[r][c]];
+  ctx.fillRect(x+1,y+1,CS-1,CS-1);
+  // 縦線
+  var lBold=((COLS-c)%5===0), rBold=((COLS-c-1)%5===0);
+  ctx.strokeStyle=lBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=lBold?1.5:0.5;
+  ctx.beginPath();ctx.moveTo(x+.5,y);ctx.lineTo(x+.5,y+CS);ctx.stroke();
+  ctx.strokeStyle=rBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=rBold?1.5:0.5;
+  ctx.beginPath();ctx.moveTo(x+CS+.5,y);ctx.lineTo(x+CS+.5,y+CS);ctx.stroke();
+  // 横線
+  var tBold=((ROWS-r)%5===0), bBold=((ROWS-r-1)%5===0);
+  ctx.strokeStyle=tBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=tBold?1.5:0.5;
+  ctx.beginPath();ctx.moveTo(x,y+.5);ctx.lineTo(x+CS,y+.5);ctx.stroke();
+  ctx.strokeStyle=bBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=bBold?1.5:0.5;
+  ctx.beginPath();ctx.moveTo(x,y+CS+.5);ctx.lineTo(x+CS,y+CS+.5);ctx.stroke();
+  if(c===0||r===0||c===COLS-1||r===ROWS-1){
+    ctx.strokeStyle='#8a6a4a';ctx.lineWidth=2;
     ctx.strokeRect(1,1,COLS*CS-2,ROWS*CS-2);
   }
 }
 
-// ── ヒットテスト ──────────────────────────────────
-function getRC(clientX, clientY) {
-  var rect = canvas.getBoundingClientRect();
-  var x = clientX - rect.left;
-  var y = clientY - rect.top;
-  if (x<0||y<0||x>=COLS*CS||y>=ROWS*CS) return null;
-  return { r: Math.floor(y/CS), c: Math.floor(x/CS) };
+function getRC(clientX,clientY){
+  var rect=canvas.getBoundingClientRect();
+  var x=clientX-rect.left, y=clientY-rect.top;
+  if(x<0||y<0||x>=COLS*CS||y>=ROWS*CS)return null;
+  return{r:Math.floor(y/CS),c:Math.floor(x/CS)};
 }
 
-// ── ペイント ──────────────────────────────────────
-function paintCell(r, c, mode) {
-  var nc = (mode==='erase') ? 'white' : paint;
-  if (grid[r][c]===nc) return;
-  grid[r][c] = nc;
-  redrawCell(r, c);
+function paintCell(r,c,mode){
+  var nc=(mode==='erase')?'white':paint;
+  if(grid[r][c]===nc)return;
+  grid[r][c]=nc;
+  redrawCell(r,c);
 }
 
-// ── マウス ────────────────────────────────────────
-canvas.addEventListener('mousedown', function(e) {
-  var p = getRC(e.clientX, e.clientY);
-  if (!p) return;
-  drawMode = (grid[p.r][p.c]===paint) ? 'erase' : 'paint';
-  drawing = true;
-  paintCell(p.r, p.c, drawMode);
-  e.preventDefault();
+// マウス
+canvas.addEventListener('mousedown',function(e){
+  var p=getRC(e.clientX,e.clientY);
+  if(!p)return;
+  drawMode=(grid[p.r][p.c]===paint)?'erase':'paint';
+  drawing=true; paintCell(p.r,p.c,drawMode); e.preventDefault();
 });
-window.addEventListener('mousemove', function(e) {
-  if (!drawing) return;
-  var p = getRC(e.clientX, e.clientY);
-  if (!p) return;
-  var key = p.r+','+p.c;
-  if (key===lastRC) return;
-  lastRC = key;
-  paintCell(p.r, p.c, drawMode);
+window.addEventListener('mousemove',function(e){
+  if(!drawing)return;
+  var p=getRC(e.clientX,e.clientY);
+  if(!p)return;
+  var key=p.r+','+p.c;
+  if(key===lastRC)return;
+  lastRC=key; paintCell(p.r,p.c,drawMode);
 });
-window.addEventListener('mouseup', function() { drawing=false; drawMode=null; lastRC=null; });
+window.addEventListener('mouseup',function(){drawing=false;drawMode=null;lastRC=null;});
 
-// ── タッチ ────────────────────────────────────────
-canvas.addEventListener('touchstart', function(e) {
-  if (e.touches.length===2) {
-    pinching=true; drawing=false;
+// タッチ
+canvas.addEventListener('touchstart',function(e){
+  if(e.touches.length===2){
+    pinching=true;drawing=false;
     var dx=e.touches[0].clientX-e.touches[1].clientX;
     var dy=e.touches[0].clientY-e.touches[1].clientY;
-    p0dist=Math.sqrt(dx*dx+dy*dy); p0zi=zi;
-    e.preventDefault(); return;
+    p0dist=Math.sqrt(dx*dx+dy*dy);p0zi=zi;
+    e.preventDefault();return;
   }
   pinching=false;
   var t=e.touches[0];
-  var p=getRC(t.clientX, t.clientY);
-  if (!p) return;
+  var p=getRC(t.clientX,t.clientY);
+  if(!p)return;
   lastRC=p.r+','+p.c;
   drawMode=(grid[p.r][p.c]===paint)?'erase':'paint';
-  drawing=true;
-  paintCell(p.r, p.c, drawMode);
-  e.preventDefault();
-}, {passive:false});
+  drawing=true; paintCell(p.r,p.c,drawMode); e.preventDefault();
+},{passive:false});
 
-canvas.addEventListener('touchmove', function(e) {
-  if (e.touches.length===2 && pinching) {
+canvas.addEventListener('touchmove',function(e){
+  if(e.touches.length===2&&pinching){
     var dx=e.touches[0].clientX-e.touches[1].clientX;
     var dy=e.touches[0].clientY-e.touches[1].clientY;
     var d=Math.sqrt(dx*dx+dy*dy);
     var ratio=d/p0dist;
     var ni=p0zi;
-    if (ratio>1.25)     ni=Math.min(ZOOM.length-1, p0zi+Math.floor((ratio-1)/0.25));
-    else if (ratio<0.8) ni=Math.max(0, p0zi-Math.floor((1-ratio)/0.2));
-    if (ni!==zi) { zi=ni; CS=ZOOM[zi]; updateZval(); draw(); }
-    e.preventDefault(); return;
+    if(ratio>1.25)ni=Math.min(ZOOM.length-1,p0zi+Math.floor((ratio-1)/0.25));
+    else if(ratio<0.8)ni=Math.max(0,p0zi-Math.floor((1-ratio)/0.2));
+    if(ni!==zi){zi=ni;CS=ZOOM[zi];updateZval();draw();}
+    e.preventDefault();return;
   }
-  if (!drawing||pinching) return;
+  if(!drawing||pinching)return;
   var t=e.touches[0];
-  var p=getRC(t.clientX, t.clientY);
-  if (!p) return;
+  var p=getRC(t.clientX,t.clientY);
+  if(!p)return;
   var key=p.r+','+p.c;
-  if (key===lastRC) return;
-  lastRC=key;
-  paintCell(p.r, p.c, drawMode);
-  e.preventDefault();
-}, {passive:false});
+  if(key===lastRC)return;
+  lastRC=key; paintCell(p.r,p.c,drawMode); e.preventDefault();
+},{passive:false});
 
-canvas.addEventListener('touchend', function() {
-  drawing=false; drawMode=null; lastRC=null; pinching=false;
+canvas.addEventListener('touchend',function(){
+  drawing=false;drawMode=null;lastRC=null;pinching=false;
 });
 
-// ── ズーム ────────────────────────────────────────
-function updateZval() {
-  document.getElementById('zval').textContent = Math.round(CS/28*100)+'%';
+// ズーム
+function updateZval(){
+  document.getElementById('zval').textContent=Math.round(CS/28*100)+'%';
 }
-document.getElementById('btn-zm').addEventListener('click', function() {
+document.getElementById('btn-zm').addEventListener('click',function(){
   if(zi>0){zi--;CS=ZOOM[zi];updateZval();draw();}
 });
-document.getElementById('btn-zp').addEventListener('click', function() {
+document.getElementById('btn-zp').addEventListener('click',function(){
   if(zi<ZOOM.length-1){zi++;CS=ZOOM[zi];updateZval();draw();}
 });
-document.getElementById('btn-fit').addEventListener('click', function() {
+document.getElementById('btn-fit').addEventListener('click',function(){
   var wrap=document.getElementById('canvas-wrap');
-  var aw=wrap.clientWidth-54, ah=wrap.clientHeight-54;
-  var fit=Math.floor(Math.min(aw/COLS, ah/ROWS));
+  var aw=wrap.clientWidth-62,ah=wrap.clientHeight-48;
+  var fit=Math.floor(Math.min(aw/COLS,ah/ROWS));
   var best=0;
   for(var i=0;i<ZOOM.length;i++){if(ZOOM[i]<=fit)best=i;}
-  zi=best; CS=ZOOM[zi]; updateZval(); draw();
+  zi=best;CS=ZOOM[zi];updateZval();draw();
   wrap.scrollTo(0,0);
 });
 
-// ── 色選択 ────────────────────────────────────────
-['black','white','gray'].forEach(function(col) {
-  document.getElementById('b-'+col).addEventListener('click', function() {
+// 色
+['black','white','gray'].forEach(function(col){
+  document.getElementById('b-'+col).addEventListener('click',function(){
     paint=col;
     document.querySelectorAll('.cbtn').forEach(function(b){b.classList.remove('on');});
     this.classList.add('on');
   });
 });
 
-// ── サイズ変更 ────────────────────────────────────
-document.getElementById('btn-apply').addEventListener('click', function() {
-  var nr=Math.max(3,Math.min(100,+document.getElementById('inp-r').value));
-  var nc=Math.max(3,Math.min(100,+document.getElementById('inp-c').value));
+// サイズ
+document.getElementById('btn-apply').addEventListener('click',function(){
+  var nr=Math.max(3,Math.min(200,+document.getElementById('inp-r').value));
+  var nc=Math.max(3,Math.min(200,+document.getElementById('inp-c').value));
   var ng=makeGrid(nr,nc);
   for(var r=0;r<Math.min(ROWS,nr);r++)
     for(var c=0;c<Math.min(COLS,nc);c++)
       ng[r][c]=grid[r][c];
-  ROWS=nr; COLS=nc; grid=ng; draw();
+  ROWS=nr;COLS=nc;grid=ng;draw();
 });
 
-// ── クリア ────────────────────────────────────────
-document.getElementById('btn-clear').addEventListener('click', function() {
-  grid=makeGrid(ROWS,COLS); draw();
+// クリア
+document.getElementById('btn-clear').addEventListener('click',function(){
+  grid=makeGrid(ROWS,COLS);draw();
 });
 
-// ── PNG保存 ───────────────────────────────────────
-document.getElementById('btn-png').addEventListener('click', function() {
-  var cs=28, pL=32, pT=16, pB=28, pR=16;
+// 再読込
+document.getElementById('btn-reload').addEventListener('click',function(){
+  location.href=location.href.split('?')[0]+'?v='+Date.now();
+});
+
+// PNG保存
+document.getElementById('btn-png').addEventListener('click',function(){
+  var cs=28,pL=32,pT=16,pB=28,pR=16;
   var cvs=document.createElement('canvas');
-  cvs.width=COLS*cs+pL+pR; cvs.height=ROWS*cs+pT+pB;
+  cvs.width=COLS*cs+pL+pR;cvs.height=ROWS*cs+pT+pB;
   var c2=cvs.getContext('2d');
-  c2.fillStyle='#faf9f6'; c2.fillRect(0,0,cvs.width,cvs.height);
-  var ox=pL, oy=pT;
+  c2.fillStyle='#faf9f6';c2.fillRect(0,0,cvs.width,cvs.height);
+  var ox=pL,oy=pT;
   for(var r=0;r<ROWS;r++){
     for(var c=0;c<COLS;c++){
-      var x=ox+c*cs, y=oy+r*cs;
-      c2.fillStyle=COLORS[grid[r][c]]; c2.fillRect(x,y,cs,cs);
+      var x=ox+c*cs,y=oy+r*cs;
+      c2.fillStyle=COLORS[grid[r][c]];c2.fillRect(x,y,cs,cs);
       c2.strokeStyle=(grid[r][c]==='black')?'#3a3a3a':'#b8a898';
-      c2.lineWidth=(c%5===4||r%5===4)?1.2:0.5;
+      c2.lineWidth=((COLS-c-1)%5===0||(ROWS-r-1)%5===0)?1.2:0.5;
       c2.strokeRect(x+.5,y+.5,cs-1,cs-1);
     }
   }
-  c2.fillStyle='#8a6a4a'; c2.font='10px monospace'; c2.textAlign='left';
-  for(var r2=0;r2<ROWS;r2++){var n=ROWS-r2;if(n%5===0||n===1||n===ROWS)c2.fillText(n,ox+COLS*cs+3,oy+r2*cs+cs/2+3);}
+  c2.fillStyle='#8a6a4a';c2.font='10px monospace';
+  c2.textAlign='left';
+  for(var r2=0;r2<ROWS;r2++){
+    var n=ROWS-r2;
+    if(n%5===0||n===1||n===ROWS)c2.fillText(n,ox+COLS*cs+3,oy+r2*cs+cs/2+3);
+  }
   c2.textAlign='center';
-  for(var cc=0;cc<COLS;cc++){var n2=COLS-cc;if(n2%5===0||n2===1)c2.fillText(n2,ox+cc*cs+cs/2,oy+ROWS*cs+12);}
+  for(var cc=0;cc<COLS;cc++){
+    var n2=COLS-cc;
+    if(n2%5===0||n2===1)c2.fillText(n2,ox+cc*cs+cs/2,oy+ROWS*cs+12);
+  }
   var link=document.createElement('a');
   link.download='filet-pattern.png';
   link.href=cvs.toDataURL('image/png');
-  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  document.body.appendChild(link);link.click();document.body.removeChild(link);
 });
 
-// ── 起動 ──────────────────────────────────────────
-document.getElementById('btn-reload').addEventListener('click', function() {
-  location.href = location.href.split('?')[0] + '?v=' + Date.now();
-});
-
-grid = makeGrid(ROWS, COLS);
+// 起動
+grid=makeGrid(ROWS,COLS);
 draw();
 </script>
 </body>
