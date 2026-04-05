@@ -13,7 +13,8 @@ html, body {
   width: 100%; height: 100%;
   background: #f5f2ed;
   font-family: Georgia, serif;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   display: flex; flex-direction: column;
 }
 
@@ -83,14 +84,19 @@ button {
 }
 
 #canvas-wrap {
+  min-width: 0;
   flex: 1;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overflow-x: auto;
+  overflow-y: auto;
   background: #f5f2ed;
-  padding: 16px 16px 24px 38px;
+  padding: 16px 24px 24px 38px;
   position: relative;
 }
 canvas#grid {
+  max-width: none;
   display: block;
   touch-action: none;
 }
@@ -171,6 +177,7 @@ function draw() {
   canvas.height = h;
   canvas.style.width  = w + 'px';
   canvas.style.height = h + 'px';
+  document.getElementById('canvas-wrap').style.minWidth = (w + 62) + 'px';
 
   // 全体背景
   ctx.fillStyle = '#ffffff';
@@ -190,7 +197,7 @@ function draw() {
   // グリッド線
   ctx.beginPath();
   for (var c2=0;c2<=COLS;c2++) {
-    var bold = (c2 % 5 === 0);
+    var bold = ((COLS - c2) % 5 === 0);
     ctx.lineWidth = bold ? 1.5 : 0.5;
     ctx.strokeStyle = bold ? '#8a7a6a' : '#c8b8a0';
     ctx.beginPath();
@@ -263,7 +270,7 @@ function redrawCell(r, c) {
   ctx.fillRect(x+1, y+1, CS-1, CS-1);
   // 線を再描画
   // 縦線（左・右）
-  var lBold = (c%5===0), rBold = ((c+1)%5===0);
+  var lBold = ((COLS-c)%5===0), rBold = ((COLS-c-1)%5===0);
   ctx.strokeStyle = lBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=lBold?1.5:0.5;
   ctx.beginPath(); ctx.moveTo(x+.5,y); ctx.lineTo(x+.5,y+CS); ctx.stroke();
   ctx.strokeStyle = rBold?'#8a7a6a':'#c8b8a0'; ctx.lineWidth=rBold?1.5:0.5;
