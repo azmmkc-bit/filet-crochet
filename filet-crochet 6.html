@@ -106,6 +106,7 @@ canvas#grid {
   <div class="hbtns">
     <button class="hbtn" id="btn-clear">クリア</button>
     <button class="hbtn g" id="btn-png">PNG保存</button>
+    <button class="hbtn" id="btn-reload" style="border-color:#6a6a9a;">再読込</button>
   </div>
 </div>
 
@@ -437,6 +438,10 @@ document.getElementById('btn-png').addEventListener('click', function() {
 });
 
 // ── 起動 ──────────────────────────────────────────
+document.getElementById('btn-reload').addEventListener('click', function() {
+  location.href = location.href.split('?')[0] + '?v=' + Date.now();
+});
+
 grid = makeGrid(ROWS, COLS);
 draw();
 </script>
