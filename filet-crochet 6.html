@@ -155,6 +155,22 @@ canvas#grid {
   display: block;
   touch-action: pan-x pan-y;
 }
+#select-overlay {
+  position: absolute;
+  pointer-events: none;
+  border: 2px solid #4a7aaa;
+  background: rgba(74,122,170,0.15);
+  display: none;
+  box-sizing: border-box;
+}
+#paste-overlay {
+  position: absolute;
+  pointer-events: none;
+  border: 2px dashed #4aaa7a;
+  background: rgba(74,170,122,0.15);
+  display: none;
+  box-sizing: border-box;
+}
 </style>
 </head>
 <body>
@@ -188,6 +204,13 @@ canvas#grid {
     <button class="zbtn" id="btn-zp">＋</button>
     <button class="zbtn" style="font-size:12px" id="btn-fit">⊡</button>
   </div>
+  <div class="tgrp">
+    <button class="zbtn" id="btn-select" style="font-size:12px;width:auto;padding:0 8px;" title="選択モード">選択</button>
+    <button class="zbtn" id="btn-undo" style="font-size:12px;width:auto;padding:0 8px;" title="元に戻す">戻る</button>
+    <button class="zbtn" id="btn-copy" style="font-size:12px;width:auto;padding:0 8px;display:none;" title="コピー">コピー</button>
+    <button class="zbtn" id="btn-paste" style="font-size:12px;width:auto;padding:0 8px;display:none;background:#e8f0e8;" title="貼付">貼付</button>
+    <button class="zbtn" id="btn-cancel-sel" style="font-size:12px;width:auto;padding:0 8px;display:none;background:#f0e8e8;" title="キャンセル">✕</button>
+  </div>
   <div id="sc-wrap">1段 <span id="sc-val">—</span> 目</div>
 </div>
 
@@ -196,10 +219,14 @@ canvas#grid {
   <label>段数 <input type="number" id="inp-r" min="3" max="200" value="20"></label>
   <label>目数 <input type="number" id="inp-c" min="3" max="200" value="20"></label>
   <button class="abtn" id="btn-apply">適用</button>
+  <label class="abtn" style="background:#6a4a7a;display:inline-block;cursor:pointer;" for="img-input">画像取込</label>
+  <input type="file" id="img-input" accept="image/*" style="display:none;">
 </div>
 
 <div id="canvas-wrap">
   <canvas id="grid"></canvas>
+  <div id="select-overlay"></div>
+  <div id="paste-overlay"></div>
 </div>
 
 <!-- 編み図リストパネル -->
@@ -223,12 +250,20 @@ var zi=4, CS=ZOOM[zi];
 var ROWS=20, COLS=20;
 var COLORS={white:'#ffffff',black:'#1a1a1a',gray:'#a0a0a0'};
 var grid=[];
+var undoStack=[];  // 最大30件
 var paint='black';
 var drawing=false, drawMode=null, lastRC=null;
 var pinching=false, p0dist=0, p0zi=0;
 var currentName='未保存';
 
 var canvas=document.getElementById('grid');
+// 選択モード関連
+var selectMode=false;   // 選択モード
+var pasteMode=false;    // 貼り付け待ちモード
+var selStart=null;      // 選択開始セル
+var selEnd=null;        // 選択終了セル
+var copyBuf=null;       // コピーバッファ {rows,cols,data}
+var copySize=null;      // コピーサイズ {rows,cols}
 var ctx=canvas.getContext('2d');
 
 function makeGrid(r,c){
@@ -260,6 +295,7 @@ function draw(){
   }
   ctx.strokeStyle='#8a6a4a';ctx.lineWidth=2;ctx.strokeRect(1,1,w-2,h-2);
   drawLabels();updateSC();
+  updateSelectOverlay();
 }
 
 function drawLabels(){
@@ -290,7 +326,45 @@ function drawLabels(){
   canvas.insertAdjacentElement('afterend',div2);
 }
 
+function pushUndo(){
+  // 現在のgridをコピーしてスタックに積む
+  undoStack.push({
+    rows:ROWS,cols:COLS,
+    grid:grid.map(function(row){return row.slice();})
+  });
+  if(undoStack.length>30)undoStack.shift();
+}
+
 function updateSC(){document.getElementById('sc-val').textContent=COLS*2+1;}
+
+function updateSelectOverlay(){
+  var ov=document.getElementById('select-overlay');
+  if(!selectMode||!selStart||!selEnd){ov.style.display='none';return;}
+  var r1=Math.min(selStart.r,selEnd.r),r2=Math.max(selStart.r,selEnd.r);
+  var c1=Math.min(selStart.c,selEnd.c),c2=Math.max(selStart.c,selEnd.c);
+  var rect=canvas.getBoundingClientRect();
+  var wrap=document.getElementById('canvas-wrap');
+  var scrollX=wrap.scrollLeft,scrollY=wrap.scrollTop;
+  var padL=38,padT=16;
+  ov.style.display='block';
+  ov.style.left=(padL+c1*CS)+'px';
+  ov.style.top=(padT+r1*CS)+'px';
+  ov.style.width=((c2-c1+1)*CS)+'px';
+  ov.style.height=((r2-r1+1)*CS)+'px';
+}
+
+function updatePasteOverlay(r,c){
+  var ov=document.getElementById('paste-overlay');
+  if(!pasteMode||!copySize||r===null){ov.style.display='none';return;}
+  var padL=38,padT=16;
+  var rows=Math.min(copySize.rows,ROWS-r);
+  var cols=Math.min(copySize.cols,COLS-c);
+  ov.style.display='block';
+  ov.style.left=(padL+c*CS)+'px';
+  ov.style.top=(padT+r*CS)+'px';
+  ov.style.width=(cols*CS)+'px';
+  ov.style.height=(rows*CS)+'px';
+}
 
 function redrawCell(r,c){
   var x=c*CS,y=r*CS;
@@ -325,13 +399,27 @@ function paintCell(r,c,mode){
 
 // マウス
 canvas.addEventListener('mousedown',function(e){
+  if(pasteMode){
+    var p=getRC(e.clientX,e.clientY);
+    if(p){doPaste(p.r,p.c);}
+    return;
+  }
+  if(selectMode){
+    var p=getRC(e.clientX,e.clientY);if(!p)return;
+    selStart=p;selEnd=p;drawing=true;
+    updateSelectOverlay();e.preventDefault();return;
+  }
   var p=getRC(e.clientX,e.clientY);if(!p)return;
   drawMode=(grid[p.r][p.c]===paint)?'erase':'paint';
-  drawing=true;paintCell(p.r,p.c,drawMode);e.preventDefault();
+  pushUndo();drawing=true;paintCell(p.r,p.c,drawMode);e.preventDefault();
 });
 window.addEventListener('mousemove',function(e){
   if(!drawing)return;
   var p=getRC(e.clientX,e.clientY);if(!p)return;
+  if(selectMode){
+    var key=p.r+','+p.c;if(key===lastRC)return;
+    lastRC=key;selEnd=p;updateSelectOverlay();return;
+  }
   var key=p.r+','+p.c;if(key===lastRC)return;
   lastRC=key;paintCell(p.r,p.c,drawMode);
 });
@@ -349,9 +437,14 @@ canvas.addEventListener('touchstart',function(e){
   pinching=false;
   var t=e.touches[0];
   var p=getRC(t.clientX,t.clientY);if(!p)return;
+  if(pasteMode){doPaste(p.r,p.c);return;}
+  if(selectMode){
+    selStart=p;selEnd=p;lastRC=p.r+','+p.c;drawing=true;
+    updateSelectOverlay();e.preventDefault();return;
+  }
   lastRC=p.r+','+p.c;
   drawMode=(grid[p.r][p.c]===paint)?'erase':'paint';
-  drawing=true;paintCell(p.r,p.c,drawMode);e.preventDefault();
+  pushUndo();drawing=true;paintCell(p.r,p.c,drawMode);e.preventDefault();
 },{passive:false});
 
 canvas.addEventListener('touchmove',function(e){
@@ -367,6 +460,10 @@ canvas.addEventListener('touchmove',function(e){
   if(!drawing||pinching)return;
   var t=e.touches[0];
   var p=getRC(t.clientX,t.clientY);if(!p)return;
+  if(selectMode){
+    var key=p.r+','+p.c;if(key===lastRC)return;
+    lastRC=key;selEnd=p;updateSelectOverlay();e.preventDefault();return;
+  }
   var key=p.r+','+p.c;if(key===lastRC)return;
   lastRC=key;paintCell(p.r,p.c,drawMode);e.preventDefault();
 },{passive:false});
@@ -403,7 +500,39 @@ document.getElementById('btn-apply').addEventListener('click',function(){
   var ng=makeGrid(nr,nc);
   for(var r=0;r<Math.min(ROWS,nr);r++)
     for(var c=0;c<Math.min(COLS,nc);c++)ng[r][c]=grid[r][c];
-  ROWS=nr;COLS=nc;grid=ng;draw();
+  pushUndo();ROWS=nr;COLS=nc;grid=ng;draw();
+});
+
+// 画像取込
+document.getElementById('img-input').addEventListener('change',function(e){
+  var file=e.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      var tmp=document.createElement('canvas');
+      tmp.width=COLS;tmp.height=ROWS;
+      var tc=tmp.getContext('2d');
+      tc.fillStyle='#ffffff';
+      tc.fillRect(0,0,COLS,ROWS);
+      tc.drawImage(img,0,0,COLS,ROWS);
+      var pixels=tc.getImageData(0,0,COLS,ROWS).data;
+      var newGrid=makeGrid(ROWS,COLS);
+      for(var r=0;r<ROWS;r++){
+        for(var c=0;c<COLS;c++){
+          var idx=(r*COLS+c)*4;
+          var brightness=0.299*pixels[idx]+0.587*pixels[idx+1]+0.114*pixels[idx+2];
+          newGrid[r][c]=(brightness<=128)?'black':'white';
+        }
+      }
+      grid=newGrid;draw();setCurrentName('未保存');
+      // 同じファイルを再度選べるようにリセット
+      e.target.value='';
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
 });
 
 // 新規作成
@@ -435,6 +564,101 @@ document.getElementById('btn-save-quick').addEventListener('click',function(){
 // クリア
 document.getElementById('btn-clear').addEventListener('click',function(){
   grid=makeGrid(ROWS,COLS);draw();
+});
+
+// 選択モード
+function enterSelectMode(){
+  selectMode=true;pasteMode=false;
+  selStart=null;selEnd=null;
+  document.getElementById('btn-select').style.background='#8a6a4a';
+  document.getElementById('btn-select').style.color='#fff';
+  document.getElementById('btn-copy').style.display='';
+  document.getElementById('btn-cancel-sel').style.display='';
+  document.getElementById('btn-paste').style.display='none';
+  canvas.style.touchAction='none'; // 選択中はスクロール無効
+}
+
+function exitSelectMode(){
+  selectMode=false;pasteMode=false;
+  selStart=null;selEnd=null;
+  document.getElementById('btn-select').style.background='';
+  document.getElementById('btn-select').style.color='';
+  document.getElementById('btn-copy').style.display='none';
+  document.getElementById('btn-paste').style.display='none';
+  document.getElementById('btn-cancel-sel').style.display='none';
+  document.getElementById('select-overlay').style.display='none';
+  document.getElementById('paste-overlay').style.display='none';
+  canvas.style.touchAction='pan-x pan-y';
+}
+
+function enterPasteMode(){
+  pasteMode=true;selectMode=false;
+  document.getElementById('select-overlay').style.display='none';
+  document.getElementById('btn-copy').style.display='none';
+  document.getElementById('btn-paste').style.display='';
+  document.getElementById('btn-cancel-sel').style.display='';
+  canvas.style.touchAction='none';
+}
+
+function doPaste(r,c){
+  if(!copyBuf)return;
+  pushUndo();
+  for(var dr=0;dr<copyBuf.length;dr++){
+    for(var dc=0;dc<copyBuf[dr].length;dc++){
+      var tr=r+dr,tc=c+dc;
+      if(tr<ROWS&&tc<COLS){
+        grid[tr][tc]=copyBuf[dr][dc];
+        redrawCell(tr,tc);
+      }
+    }
+  }
+  document.getElementById('paste-overlay').style.display='none';
+  exitSelectMode();
+}
+
+document.getElementById('btn-select').addEventListener('click',function(){
+  if(selectMode){exitSelectMode();}else{enterSelectMode();}
+});
+
+document.getElementById('btn-copy').addEventListener('click',function(){
+  if(!selStart||!selEnd)return;
+  var r1=Math.min(selStart.r,selEnd.r),r2=Math.max(selStart.r,selEnd.r);
+  var c1=Math.min(selStart.c,selEnd.c),c2=Math.max(selStart.c,selEnd.c);
+  copyBuf=[];
+  for(var r=r1;r<=r2;r++){
+    var row=[];
+    for(var c=c1;c<=c2;c++)row.push(grid[r][c]);
+    copyBuf.push(row);
+  }
+  copySize={rows:r2-r1+1,cols:c2-c1+1};
+  enterPasteMode();
+  alert('コピーしました！貼り付け先の左上マスをタップしてください');
+});
+
+document.getElementById('btn-paste').addEventListener('click',function(){
+  alert('貼り付け先の左上マスをタップしてください');
+});
+
+document.getElementById('btn-cancel-sel').addEventListener('click',function(){
+  exitSelectMode();
+});
+
+// 貼付プレビュー（マウス移動時）
+canvas.addEventListener('mousemove',function(e){
+  if(!pasteMode)return;
+  var p=getRC(e.clientX,e.clientY);
+  if(p)updatePasteOverlay(p.r,p.c);
+});
+
+// 戻る
+document.getElementById('btn-undo').addEventListener('click',function(){
+  if(undoStack.length===0){alert('これ以上戻れません');return;}
+  var state=undoStack.pop();
+  ROWS=state.rows;COLS=state.cols;
+  grid=state.grid.map(function(row){return row.slice();});
+  document.getElementById('inp-r').value=ROWS;
+  document.getElementById('inp-c').value=COLS;
+  draw();
 });
 
 // 再読込
@@ -618,6 +842,38 @@ document.getElementById('list-save-btn').addEventListener('click',function(){
   savePattern(name);
   renderList();
   alert('"'+name.trim()+'" を保存しました！');
+});
+
+// 画像取込
+document.getElementById('img-input').addEventListener('change',function(e){
+  var file=e.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      var tmp=document.createElement('canvas');
+      tmp.width=COLS;tmp.height=ROWS;
+      var tc=tmp.getContext('2d');
+      tc.fillStyle='#ffffff';
+      tc.fillRect(0,0,COLS,ROWS);
+      tc.drawImage(img,0,0,COLS,ROWS);
+      var pixels=tc.getImageData(0,0,COLS,ROWS).data;
+      var newGrid=makeGrid(ROWS,COLS);
+      for(var r=0;r<ROWS;r++){
+        for(var c=0;c<COLS;c++){
+          var idx=(r*COLS+c)*4;
+          var brightness=0.299*pixels[idx]+0.587*pixels[idx+1]+0.114*pixels[idx+2];
+          newGrid[r][c]=(brightness<=128)?'black':'white';
+        }
+      }
+      grid=newGrid;draw();setCurrentName('未保存');
+      // 同じファイルを再度選べるようにリセット
+      e.target.value='';
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
 });
 
 // 新規作成ボタン（一覧パネル内）
