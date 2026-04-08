@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>方眼編み図エディタ</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  width: 100%; height: 100%;
+  background: #f5f2ed;
+  font-family: Georgia, serif;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  position: fixed; left:0; right:0; top:0; bottom:0;
+}
+button { font-family: Georgia, serif; cursor: pointer; -webkit-appearance: none; }
+
+#header {
+  background: #2d2d2d; color: #e8ddd0;
+  padding: 8px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 3px solid #8a6a4a;
+  flex-shrink: 0;
+}
+.htitle { font-size: 13px; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
+.hbtns  { display: flex; gap: 5px; flex-shrink: 0; margin-left: 8px; }
+.hbtn {
+  background: transparent; color: #e8ddd0;
+  border: 1px solid #6a6a6a;
+  padding: 5px 8px; border-radius: 4px; font-size: 11px;
+  white-space: nowrap;
+}
+.hbtn.g { border-color: #4a8a4a; }
+.hbtn.r { border-color: #6a6a9a; }
+
+#toolbar {
+  background: #ede8e0; border-bottom: 1px solid #c8b8a0;
+  padding: 7px 10px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+.tlabel { font-size: 10px; color: #8a6a4a; letter-spacing: 1px; white-space: nowrap; }
+.tgrp   { display: flex; align-items: center; gap: 5px; }
+.cbtn { width: 34px; height: 34px; border-radius: 5px; border: 2.5px solid #c8b8a0; flex-shrink: 0; }
+.cbtn.on { border-color: #8a6a4a; box-shadow: 0 0 0 2px rgba(138,106,74,0.3); }
+#b-black { background: #1a1a1a; }
+#b-white { background: #ffffff; }
+#b-gray  { background: #a0a0a0; }
+.zbtn {
+  width: 32px; height: 32px; background: #fff;
+  border: 1px solid #c8b8a0; border-radius: 4px;
+  font-size: 18px; color: #3a3a3a;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+#zval { font-size: 11px; color: #5a4a3a; min-width: 36px; text-align: center; font-family: monospace; white-space: nowrap; }
+#sc-wrap { margin-left: auto; font-size: 11px; color: #5a4a3a; white-space: nowrap; }
+#sc-val  { font-size: 17px; font-weight: bold; color: #2d2d2d; }
+
+#sizebar {
+  background: #e8e0d4; border-bottom: 1px solid #c8b8a0;
+  padding: 5px 10px;
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0; font-size: 12px; color: #5a4a3a; flex-wrap: nowrap;
+}
+#sizebar input {
+  width: 48px; padding: 3px 5px;
+  border: 1px solid #c8b8a0; border-radius: 3px; font-size: 12px;
+}
+.abtn {
+  background: #5a5a8a; color: #fff; border: none;
+  padding: 5px 10px; border-radius: 3px; font-size: 12px; white-space: nowrap;
+}
+
+#list-panel {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: flex-end;
+}
+#list-panel.open { display: flex; }
+#list-inner {
+  background: #faf9f6;
+  width: 100%;
+  max-height: 80vh;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+#list-header {
+  background: #2d2d2d; color: #e8ddd0;
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+#list-header span { font-size: 14px; font-weight: bold; }
+#list-scroll { overflow-y: auto; flex: 1; padding: 8px 0; }
+.list-item {
+  display: flex; align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e8e0d4;
+  gap: 10px;
+}
+.list-item-name {
+  flex: 1; font-size: 14px; color: #2d2d2d;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.list-item-date { font-size: 10px; color: #9a8a7a; white-space: nowrap; }
+.list-load-btn {
+  background: #5a5a8a; color: #fff; border: none;
+  padding: 5px 10px; border-radius: 4px; font-size: 11px;
+}
+.list-del-btn {
+  background: #8a4a4a; color: #fff; border: none;
+  padding: 5px 8px; border-radius: 4px; font-size: 11px;
+}
+#list-new-area {
+  padding: 10px 16px;
+  border-top: 1px solid #c8b8a0;
+  display: flex; gap: 8px; align-items: center;
+  flex-shrink: 0; background: #f0ece4;
+}
+#list-new-area input {
+  flex: 1; padding: 7px 10px;
+  border: 1px solid #c8b8a0; border-radius: 6px; font-size: 13px;
+}
+#list-save-btn {
+  background: #3a5a3a; color: #fff; border: none;
+  padding: 7px 14px; border-radius: 6px; font-size: 12px; white-space: nowrap;
+}
+
+#current-name {
+  font-size: 10px; color: #a0907a; margin-top: 1px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 140px;
+}
+
+#canvas-wrap {
+  flex: 1;
+  overflow-x: scroll;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  background: #f5f2ed;
+  padding: 30px 60px 60px 38px;
+  position: relative;
+}
+
+/* スマホ用レイアウト */
+@media (max-width: 600px) {
+  #header {
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 6px 8px;
+  }
+  .hbtns {
+    flex-wrap: wrap;
+    margin-left: 0;
+    width: 100%;
+    gap: 4px;
+  }
+  .hbtn {
+    font-size: 10px;
+    padding: 4px 6px;
+    flex: 1;
+    text-align: center;
+  }
+  #toolbar {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 8px;
+  }
+  .tgrp {
+    gap: 4px;
+  }
+  .cbtn { width: 28px; height: 28px; }
+  .zbtn { width: 28px; height: 28px; font-size: 15px; }
+  #zval { min-width: 30px; font-size: 10px; }
+  #sc-wrap { font-size: 10px; margin-left: 0; }
+  #sc-val { font-size: 14px; }
+  #sizebar {
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 5px 8px;
+  }
+  #sizebar input { width: 42px; font-size: 11px; }
+  .abtn { font-size: 11px; padding: 4px 8px; }
+}
+canvas#grid {
+  display: block;
+  touch-action: pan-x pan-y;
+}
+#select-overlay {
+  position: absolute;
+  pointer-events: none;
+  border: 2px solid #4a7aaa;
+  background: rgba(74,122,170,0.15);
+  display: none;
+  box-sizing: border-box;
+}
+#paste-overlay {
+  position: absolute;
+  pointer-events: none;
+  border: 2px dashed #4aaa7a;
+  background: rgba(74,170,122,0.15);
+  display: none;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div class="htitle">方眼編み図エディタ</div>
+    <div id="current-name">未保存</div>
+  </div>
+  <div class="hbtns">
+    <button class="hbtn" id="btn-list">一覧</button>
+    <button class="hbtn" id="btn-new">新規</button>
+    <button class="hbtn" style="border-color:#8a6a4a;" id="btn-save-quick">保存</button>
+    <button class="hbtn" id="btn-clear">クリア</button>
+    <button class="hbtn g" id="btn-png">PNG保存</button>
+    <button class="hbtn r" id="btn-reload">再読込</button>
+  </div>
+</div>
+
+<div id="toolbar">
+  <div class="tgrp">
+    <span class="tlabel">色</span>
+    <button class="cbtn on" id="b-black"></button>
+    <button class="cbtn"    id="b-white"></button>
+    <button class="cbtn"    id="b-gray"></button>
+  </div>
+  <div class="tgrp">
+    <span class="tlabel">拡縮</span>
+    <button class="zbtn" id="btn-zm">−</button>
+    <div id="zval">100%</div>
+    <button class="zbtn" id="btn-zp">＋</button>
+    <button class="zbtn" style="font-size:12px" id="btn-fit">⊡</button>
+  </div>
+  <div class="tgrp">
+    <button class="zbtn" id="btn-select" style="font-size:12px;width:auto;padding:0 8px;">選択</button>
+    <button class="zbtn" id="btn-undo" style="font-size:12px;width:auto;padding:0 8px;">戻る</button>
+    <button class="zbtn" id="btn-copy" style="font-size:12px;width:auto;padding:0 8px;display:none;">コピー</button>
+    <button class="zbtn" id="btn-paste" style="font-size:12px;width:auto;padding:0 8px;display:none;background:#e8f0e8;">貼付</button>
+    <button class="zbtn" id="btn-cancel-sel" style="font-size:12px;width:auto;padding:0 8px;display:none;background:#f0e8e8;">✕</button>
+  </div>
+  <div id="sc-wrap">1段 <span id="sc-val">—</span> 目</div>
+</div>
+
+<div id="sizebar">
+  <span class="tlabel">サイズ</span>
+  <label>段数 <input type="number" id="inp-r" min="3" max="200" value="20"></label>
+  <label>目数 <input type="number" id="inp-c" min="3" max="200" value="20"></label>
+  <button class="abtn" id="btn-apply">適用</button>
+  <label class="abtn" style="background:#6a4a7a;display:inline-block;cursor:pointer;" for="img-input">画像取込</label>
+  <input type="file" id="img-input" accept="image/*" style="display:none;">
+</div>
+
+<div id="canvas-wrap">
+  <canvas id="grid"></canvas>
+  <div id="select-overlay"></div>
+  <div id="paste-overlay"></div>
+</div>
+
+<div id="list-panel">
+  <div id="list-inner">
+    <div id="list-header">
+      <span>📋 編み図一覧</span>
+      <button class="hbtn r" id="btn-list-close">閉じる</button>
+    </div>
+    <div id="list-scroll"></div>
+    <div id="list-new-area">
+      <input type="text" id="save-name-input" placeholder="名前をつけて保存...">
+      <button id="list-save-btn">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var ZOOM=[10,14,18,22,28,34,42,52,64];
+var zi=4, CS=ZOOM[zi];
+var ROWS=20, COLS=20;
+var COLORS={white:'#ffffff',black:'#1a1a1a',gray:'#a0a0a0'};
+var grid=[];
+var undoStack=[];
+var paint='black';
+var drawing=false, drawMode=null, lastRC=null;
+var pinching=false, p0dist=0, p0zi=0;
+var currentName='未保存';
+var canvas=document.getElementById('grid');
+var selectMode=false, pasteMode=false;
+var selStart=null, selEnd=null;
+var copyBuf=null, copySize=null;
+var ctx=canvas.getContext('2d');
+
+function makeGrid(r,c){
+  var g=[];
+  for(var i=0;i<r;i++){var row=[];for(var j=0;j<c;j++)row.push('white');g.push(row);}
+  return g;
+}
+
+function draw(){
+  var w=COLS*CS,h=ROWS*CS;
+  canvas.width=w;canvas.height=h;
+  canvas.style.width=w+'px';canvas.style.height=h+'px';
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
+  for(var r=0;r<ROWS;r++)
+    for(var c=0;c<COLS;c++)
+      if(grid[r][c]!=='white'){
+        ctx.fillStyle=COLORS[grid[r][c]];
+        ctx.fillRect(c*CS,r*CS,CS,CS);
+      }
+  for(var c2=0;c2<=COLS;c2++){
+    var bold=((COLS-c2)%5===0);
+    ctx.strokeStyle=bold?'#8a7a6a':'#c8b8a0';ctx.lineWidth=bold?1.5:0.5;
+    ctx.beginPath();ctx.moveTo(c2*CS+0.5,0);ctx.lineTo(c2*CS+0.5,h);ctx.stroke();
+  }
+  for(var r2=0;r2<=ROWS;r2++){
+    var bold2=((ROWS-r2)%5===0);
+    ctx.strokeStyle=bold2?'#8a7a6a':'#c8b8a0';ctx.lineWidth=bold2?1.5:0.5;
+    ctx.beginPath();ctx.moveTo(0,r2*CS+0.5);ctx.lineTo(w,r2*CS+0.5);ctx.stroke();
+  }
+  ctx.strokeStyle='#8a6a4a';ctx.lineWidth=2;ctx.strokeRect(1,1,w-2,h-2);
+  drawLabels();updateSC();updateSelectOverlay();
+}
+
+function drawLabels(){
+  var fs=Math.max(8,Math.round(CS*0.3));
+  var wrap=document.getElementById('canvas-wrap');
+
+  // 左辺ラベル（既存）
+  var old=document.getElementById('rlabels');if(old)old.remove();
+  var div=document.createElement('div');
+  div.id='rlabels';
+  div.style.cssText='position:absolute;left:0;top:30px;width:34px;pointer-events:none;';
+  for(var r=0;r<ROWS;r++){
+    var n=ROWS-r;
+    var d=document.createElement('div');
+    d.style.cssText='height:'+CS+'px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;';
+    d.textContent=(n%5===0||n===1||n===ROWS)?n:'';
+    div.appendChild(d);
+  }
+  wrap.appendChild(div);
+
+  // 右辺ラベル（新規）
+  var oldR=document.getElementById('rlabels-right');if(oldR)oldR.remove();
+  var divR=document.createElement('div');
+  divR.id='rlabels-right';
+  divR.style.cssText='position:absolute;left:'+(38+COLS*CS)+'px;top:30px;width:34px;pointer-events:none;';
+  for(var r2=0;r2<ROWS;r2++){
+    var n3=ROWS-r2;
+    var d3=document.createElement('div');
+    d3.style.cssText='height:'+CS+'px;display:flex;align-items:center;padding-left:4px;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;';
+    d3.textContent=(n3%5===0||n3===1||n3===ROWS)?n3:'';
+    divR.appendChild(d3);
+  }
+  wrap.appendChild(divR);
+
+  // 下辺ラベル（既存）
+  var old2=document.getElementById('clabels');if(old2)old2.remove();
+  var div2=document.createElement('div');
+  div2.id='clabels';div2.style.cssText='display:flex;margin-top:3px;';
+  for(var c=0;c<COLS;c++){
+    var n2=COLS-c;
+    var d2=document.createElement('div');
+    d2.style.cssText='width:'+CS+'px;text-align:center;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;flex-shrink:0;';
+    d2.textContent=(n2%5===0||n2===1)?n2:'';
+    div2.appendChild(d2);
+  }
+  canvas.insertAdjacentElement('afterend',div2);
+
+  // 上辺ラベル（新規）
+  var old3=document.getElementById('clabels-top');if(old3)old3.remove();
+  var div3=document.createElement('div');
+  div3.id='clabels-top';div3.style.cssText='position:absolute;left:38px;top:14px;display:flex;pointer-events:none;';
+  for(var c2=0;c2<COLS;c2++){
+    var n4=COLS-c2;
+    var d4=document.createElement('div');
+    d4.style.cssText='width:'+CS+'px;text-align:center;font-size:'+fs+'px;font-family:monospace;color:#8a6a4a;flex-shrink:0;';
+    d4.textContent=(n4%5===0||n4===1)?n4:'';
+    div3.appendChild(d4);
+  }
+  wrap.appendChild(div3);
+}
+
+function pushUndo(){
+  undoStack.push({rows:ROWS,cols:COLS,grid:grid.map(function(row){return row.slice();})});
+  if(undoStack.length>30)undoStack.shift();
+}
+
+function updateSC(){document.getElementById('sc-val').textContent=COLS*2+1;}
+
+function updateSelectOverlay(){
+  var ov=document.getElementById('select-overlay');
+  if(!selectMode||!selStart||!selEnd){ov.style.display='none';return;}
+  var r1=Math.min(selStart.r,selEnd.r),r2=Math.max(selStart.r,selEnd.r);
+  var c1=Math.min(selStart.c,selEnd.c),c2=Math.max(selStart.c,selEnd.c);
+  ov.style.display='block';
+  ov.style.left=(38+c1*CS)+'px';ov.style.top=(30+r1*CS)+'px';
+  ov.style.width=((c2-c1+1)*CS)+'px';ov.style.height=((r2-r1+1)*CS)+'px';
+}
+
+function updatePasteOverlay(r,c){
+  var ov=document.getElementById('paste-overlay');
+  if(!pasteMode||!copySize||r===null){ov.style.display='none';return;}
+  ov.style.display='block';
+  ov.style.left=(38+c*CS)+'px';ov.style.top=(30+r*CS)+'px';
+  ov.style.width=(Math.min(copySize.cols,COLS-c)*CS)+'px';
+  ov.style.height=(Math.min(copySize.rows,ROWS-r)*CS)+'px';
+}
+
+function redrawCell(r,c){
+  var x=c*CS,y=r*CS;
+  ctx.fillStyle=COLORS[grid[r][c]];ctx.fillRect(x+1,y+1,CS-1,CS-1);
+  var lB=((COLS-c)%5===0),rB=((COLS-c-1)%5===0);
+  ctx.strokeStyle=lB?'#8a7a6a':'#c8b8a0';ctx.lineWidth=lB?1.5:0.5;
+  ctx.beginPath();ctx.moveTo(x+.5,y);ctx.lineTo(x+.5,y+CS);ctx.stroke();
+  ctx.strokeStyle=rB?'#8a7a6a':'#c8b8a0';ctx.lineWidth=rB?1.5:0.5;
+  ctx.beginPath();ctx.moveTo(x+CS+.5,y);ctx.lineTo(x+CS+.5,y+CS);ctx.stroke();
+  var tB=((ROWS-r)%5===0),bB=((ROWS-r-1)%5===0);
+  ctx.strokeStyle=tB?'#8a7a6a':'#c8b8a0';ctx.lineWidth=tB?1.5:0.5;
+  ctx.beginPath();ctx.moveTo(x,y+.5);ctx.lineTo(x+CS,y+.5);ctx.stroke();
+  ctx.strokeStyle=bB?'#8a7a6a':'#c8b8a0';ctx.lineWidth=bB?1.5:0.5;
+  ctx.beginPath();ctx.moveTo(x,y+CS+.5);ctx.lineTo(x+CS,y+CS+.5);ctx.stroke();
+  if(c===0||r===0||c===COLS-1||r===ROWS-1){
+    ctx.strokeStyle='#8a6a4a';ctx.lineWidth=2;ctx.strokeRect(1,1,COLS*CS-2,ROWS*CS-2);
+  }
+}
+
+function getRC(cx,cy){
+  var rect=canvas.getBoundingClientRect();
+  var x=cx-rect.left,y=cy-rect.top;
+  if(x<0||y<0||x>=COLS*CS||y>=ROWS*CS)return null;
+  return{r:Math.floor(y/CS),c:Math.floor(x/CS)};
+}
+
+function paintCell(r,c,mode){
+  var nc=(mode==='erase')?'white':paint;
+  if(grid[r][c]===nc)return;
+  grid[r][c]=nc;redrawCell(r,c);
+}
+
+canvas.addEventListener('mousedown',function(e){
+  if(pasteMode){var p=getRC(e.clientX,e.clientY);if(p)doPaste(p.r,p.c);return;}
+  if(selectMode){
+    var p=getRC(e.clientX,e.clientY);if(!p)return;
+    selStart=p;selEnd=p;drawing=true;updateSelectOverlay();e.preventDefault();return;
+  }
+  var p=getRC(e.clientX,e.clientY);if(!p)return;
+  drawMode=(grid[p.r][p.c]===paint)?'erase':'paint';
+  pushUndo();drawing=true;paintCell(p.r,p.c,drawMode);e.preventDefault();
+});
+window.addEventListener('mousemove',function(e){
+  if(!drawing)return;
+  var p=getRC(e.clientX,e.clientY);if(!p)return;
+  if(selectMode){var key=p.r+','+p.c;if(key===lastRC)return;lastRC=key;selEnd=p;updateSelectOverlay();return;}
+  var key=p.r+','+p.c;if(key===lastRC)return;lastRC=key;paintCell(p.r,p.c,drawMode);
+});
+window.addEventListener('mouseup',function(){drawing=false;drawMode=null;lastRC=null;});
+
+canvas.addEventListener('touchstart',function(e){
+  if(e.touches.length===2){
+    drawing=false;drawMode=null;pinching=true;
+    var dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;
+    p0dist=Math.sqrt(dx*dx+dy*dy);p0zi=zi;return;
+  }
+  pinching=false;
+  var t=e.touches[0],p=getRC(t.clientX,t.clientY);if(!p)return;
+  if(pasteMode){doPaste(p.r,p.c);return;}
+  if(selectMode){selStart=p;selEnd=p;lastRC=p.r+','+p.c;drawing=true;updateSelectOverlay();e.preventDefault();return;}
+  lastRC=p.r+','+p.c;
+  drawMode=(grid[p.r][p.c]===paint)?'erase':'paint';
+  pushUndo();drawing=true;paintCell(p.r,p.c,drawMode);e.preventDefault();
+},{passive:false});
+
+canvas.addEventListener('touchmove',function(e){
+  if(e.touches.length===2&&pinching){
+    var dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;
+    var d=Math.sqrt(dx*dx+dy*dy),ratio=d/p0dist,ni=p0zi;
+    if(ratio>1.25)ni=Math.min(ZOOM.length-1,p0zi+Math.floor((ratio-1)/0.25));
+    else if(ratio<0.8)ni=Math.max(0,p0zi-Math.floor((1-ratio)/0.2));
+    if(ni!==zi){zi=ni;CS=ZOOM[zi];updateZval();draw();}return;
+  }
+  if(!drawing||pinching)return;
+  var t=e.touches[0],p=getRC(t.clientX,t.clientY);if(!p)return;
+  if(selectMode){var key=p.r+','+p.c;if(key===lastRC)return;lastRC=key;selEnd=p;updateSelectOverlay();e.preventDefault();return;}
+  var key=p.r+','+p.c;if(key===lastRC)return;lastRC=key;paintCell(p.r,p.c,drawMode);e.preventDefault();
+},{passive:false});
+
+canvas.addEventListener('touchend',function(){drawing=false;drawMode=null;lastRC=null;pinching=false;});
+
+function updateZval(){document.getElementById('zval').textContent=Math.round(CS/28*100)+'%';}
+document.getElementById('btn-zm').addEventListener('click',function(){if(zi>0){zi--;CS=ZOOM[zi];updateZval();draw();}});
+document.getElementById('btn-zp').addEventListener('click',function(){if(zi<ZOOM.length-1){zi++;CS=ZOOM[zi];updateZval();draw();}});
+document.getElementById('btn-fit').addEventListener('click',function(){
+  var wrap=document.getElementById('canvas-wrap');
+  var aw=wrap.clientWidth-62,ah=wrap.clientHeight-48;
+  var fit=Math.floor(Math.min(aw/COLS,ah/ROWS)),best=0;
+  for(var i=0;i<ZOOM.length;i++){if(ZOOM[i]<=fit)best=i;}
+  zi=best;CS=ZOOM[zi];updateZval();draw();wrap.scrollTo(0,0);
+});
+
+['black','white','gray'].forEach(function(col){
+  document.getElementById('b-'+col).addEventListener('click',function(){
+    paint=col;
+    document.querySelectorAll('.cbtn').forEach(function(b){b.classList.remove('on');});
+    this.classList.add('on');
+  });
+});
+
+document.getElementById('btn-apply').addEventListener('click',function(){
+  var nr=Math.max(3,Math.min(200,+document.getElementById('inp-r').value));
+  var nc=Math.max(3,Math.min(200,+document.getElementById('inp-c').value));
+  var ng=makeGrid(nr,nc);
+  for(var r=0;r<Math.min(ROWS,nr);r++)for(var c=0;c<Math.min(COLS,nc);c++)ng[r][c]=grid[r][c];
+  pushUndo();ROWS=nr;COLS=nc;grid=ng;draw();
+});
+
+document.getElementById('img-input').addEventListener('change',function(e){
+  var file=e.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      var tmp=document.createElement('canvas');tmp.width=COLS;tmp.height=ROWS;
+      var tc=tmp.getContext('2d');tc.fillStyle='#ffffff';tc.fillRect(0,0,COLS,ROWS);tc.drawImage(img,0,0,COLS,ROWS);
+      var pixels=tc.getImageData(0,0,COLS,ROWS).data,newGrid=makeGrid(ROWS,COLS);
+      for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+        var idx=(r*COLS+c)*4,brightness=0.299*pixels[idx]+0.587*pixels[idx+1]+0.114*pixels[idx+2];
+        newGrid[r][c]=(brightness<=128)?'black':'white';
+      }
+      grid=newGrid;draw();setCurrentName('未保存');e.target.value='';
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(file);
+});
+
+document.getElementById('btn-new').addEventListener('click',function(){
+  if(!confirm('新規作成します。現在の編み図は保存されません。よろしいですか？'))return;
+  grid=makeGrid(20,20);ROWS=20;COLS=20;
+  document.getElementById('inp-r').value=20;document.getElementById('inp-c').value=20;
+  setCurrentName('未保存');draw();
+});
+
+document.getElementById('btn-save-quick').addEventListener('click',function(){
+  var name=prompt('編み図の名前を入力してください',currentName==='未保存'?'':currentName);
+  if(name===null)return;
+  if(!name.trim()){alert('名前を入力してください');return;}
+  var list=getSavedList(),exists=list.some(function(i){return i.name===name.trim();});
+  if(exists&&!confirm('"'+name.trim()+'" を上書きしますか？'))return;
+  savePattern(name);alert('"'+name.trim()+'" を保存しました！');
+});
+
+document.getElementById('btn-clear').addEventListener('click',function(){grid=makeGrid(ROWS,COLS);draw();});
+
+function enterSelectMode(){
+  selectMode=true;pasteMode=false;selStart=null;selEnd=null;
+  document.getElementById('btn-select').style.background='#8a6a4a';
+  document.getElementById('btn-select').style.color='#fff';
+  document.getElementById('btn-copy').style.display='';
+  document.getElementById('btn-cancel-sel').style.display='';
+  document.getElementById('btn-paste').style.display='none';
+  canvas.style.touchAction='none';
+}
+
+function exitSelectMode(){
+  selectMode=false;pasteMode=false;selStart=null;selEnd=null;
+  document.getElementById('btn-select').style.background='';
+  document.getElementById('btn-select').style.color='';
+  document.getElementById('btn-copy').style.display='none';
+  document.getElementById('btn-paste').style.display='none';
+  document.getElementById('btn-cancel-sel').style.display='none';
+  document.getElementById('select-overlay').style.display='none';
+  document.getElementById('paste-overlay').style.display='none';
+  canvas.style.touchAction='pan-x pan-y';
+}
+
+function enterPasteMode(){
+  pasteMode=true;selectMode=false;
+  document.getElementById('select-overlay').style.display='none';
+  document.getElementById('btn-copy').style.display='none';
+  document.getElementById('btn-paste').style.display='';
+  document.getElementById('btn-cancel-sel').style.display='';
+  canvas.style.touchAction='none';
+}
+
+function doPaste(r,c){
+  if(!copyBuf)return;pushUndo();
+  for(var dr=0;dr<copyBuf.length;dr++)for(var dc=0;dc<copyBuf[dr].length;dc++){
+    var tr=r+dr,tc=c+dc;
+    if(tr<ROWS&&tc<COLS){grid[tr][tc]=copyBuf[dr][dc];redrawCell(tr,tc);}
+  }
+  document.getElementById('paste-overlay').style.display='none';exitSelectMode();
+}
+
+document.getElementById('btn-select').addEventListener('click',function(){if(selectMode)exitSelectMode();else enterSelectMode();});
+document.getElementById('btn-copy').addEventListener('click',function(){
+  if(!selStart||!selEnd)return;
+  var r1=Math.min(selStart.r,selEnd.r),r2=Math.max(selStart.r,selEnd.r);
+  var c1=Math.min(selStart.c,selEnd.c),c2=Math.max(selStart.c,selEnd.c);
+  copyBuf=[];
+  for(var r=r1;r<=r2;r++){var row=[];for(var c=c1;c<=c2;c++)row.push(grid[r][c]);copyBuf.push(row);}
+  copySize={rows:r2-r1+1,cols:c2-c1+1};
+  enterPasteMode();alert('コピーしました！貼り付け先の左上マスをタップしてください');
+});
+document.getElementById('btn-paste').addEventListener('click',function(){alert('貼り付け先の左上マスをタップしてください');});
+document.getElementById('btn-cancel-sel').addEventListener('click',exitSelectMode);
+canvas.addEventListener('mousemove',function(e){if(!pasteMode)return;var p=getRC(e.clientX,e.clientY);if(p)updatePasteOverlay(p.r,p.c);});
+
+document.getElementById('btn-undo').addEventListener('click',function(){
+  if(undoStack.length===0){alert('これ以上戻れません');return;}
+  var state=undoStack.pop();
+  ROWS=state.rows;COLS=state.cols;
+  grid=state.grid.map(function(row){return row.slice();});
+  document.getElementById('inp-r').value=ROWS;document.getElementById('inp-c').value=COLS;draw();
+});
+
+document.getElementById('btn-reload').addEventListener('click',function(){
+  location.href=location.href.split('?')[0]+'?v='+Date.now();
+});
+
+document.getElementById('btn-png').addEventListener('click',function(){
+  var cs=28,pL=36,pT=16,pB=28,pR=20;
+  var cvs=document.createElement('canvas');
+  cvs.width=COLS*cs+pL+pR;cvs.height=ROWS*cs+pT+pB;
+  var c2=cvs.getContext('2d');
+  c2.fillStyle='#faf9f6';c2.fillRect(0,0,cvs.width,cvs.height);
+  var ox=pL,oy=pT;
+  for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+    c2.fillStyle=COLORS[grid[r][c]];c2.fillRect(ox+c*cs,oy+r*cs,cs,cs);
+  }
+  for(var c2i=0;c2i<=COLS;c2i++){
+    var bold=((COLS-c2i)%5===0);
+    c2.strokeStyle=bold?'#8a7a6a':'#c8b8a0';c2.lineWidth=bold?1.5:0.5;
+    c2.beginPath();c2.moveTo(ox+c2i*cs+0.5,oy);c2.lineTo(ox+c2i*cs+0.5,oy+ROWS*cs);c2.stroke();
+  }
+  for(var r2i=0;r2i<=ROWS;r2i++){
+    var bold2=((ROWS-r2i)%5===0);
+    c2.strokeStyle=bold2?'#8a7a6a':'#c8b8a0';c2.lineWidth=bold2?1.5:0.5;
+    c2.beginPath();c2.moveTo(ox,oy+r2i*cs+0.5);c2.lineTo(ox+COLS*cs,oy+r2i*cs+0.5);c2.stroke();
+  }
+  c2.strokeStyle='#8a6a4a';c2.lineWidth=2;c2.strokeRect(ox+1,oy+1,COLS*cs-2,ROWS*cs-2);
+  c2.fillStyle='#8a6a4a';c2.font='10px monospace';c2.textAlign='left';
+  for(var r2=0;r2<ROWS;r2++){var n=ROWS-r2;if(n%5===0||n===1||n===ROWS)c2.fillText(n,ox+COLS*cs+4,oy+r2*cs+cs/2+3);}
+  c2.textAlign='center';
+  for(var cc=0;cc<COLS;cc++){var n2=COLS-cc;if(n2%5===0||n2===1)c2.fillText(n2,ox+cc*cs+cs/2,oy+ROWS*cs+14);}
+  var link=document.createElement('a');
+  link.download=(currentName==='未保存'?'filet-pattern':currentName)+'.png';
+  link.href=cvs.toDataURL('image/png');
+  document.body.appendChild(link);link.click();document.body.removeChild(link);
+});
+
+function setCurrentName(name){currentName=name;document.getElementById('current-name').textContent=name;}
+function getSavedList(){try{var s=localStorage.getItem('filet_list');return s?JSON.parse(s):[];}catch(e){return[];}}
+function saveList(list){localStorage.setItem('filet_list',JSON.stringify(list));}
+function savePattern(name){
+  if(!name||!name.trim())return false;name=name.trim();
+  var list=getSavedList(),data={name:name,date:new Date().toLocaleDateString('ja-JP'),rows:ROWS,cols:COLS,grid:grid.map(function(row){return row.slice();})};
+  var idx=list.findIndex(function(i){return i.name===name;});
+  if(idx>=0)list[idx]=data;else list.unshift(data);
+  saveList(list);setCurrentName(name);return true;
+}
+function loadPattern(name){
+  var list=getSavedList(),data=list.find(function(i){return i.name===name;});if(!data)return;
+  ROWS=data.rows;COLS=data.cols;grid=data.grid.map(function(row){return row.slice();});
+  document.getElementById('inp-r').value=ROWS;document.getElementById('inp-c').value=COLS;
+  setCurrentName(data.name);draw();closeListPanel();
+}
+function deletePattern(name){
+  var list=getSavedList().filter(function(i){return i.name!==name;});
+  saveList(list);if(currentName===name)setCurrentName('未保存');renderList();
+}
+function renderList(){
+  var list=getSavedList(),scroll=document.getElementById('list-scroll');scroll.innerHTML='';
+  if(list.length===0){scroll.innerHTML='<div style="padding:20px;text-align:center;color:#9a8a7a;font-size:13px;">保存された編み図はありません</div>';return;}
+  list.forEach(function(item){
+    var div=document.createElement('div');div.className='list-item';
+    div.innerHTML='<div class="list-item-name">'+item.name+'</div><div class="list-item-date">'+item.date+'</div><button class="list-load-btn" data-name="'+item.name+'">開く</button><button class="list-del-btn" data-name="'+item.name+'">削除</button>';
+    scroll.appendChild(div);
+  });
+  scroll.querySelectorAll('.list-load-btn').forEach(function(btn){btn.addEventListener('click',function(){loadPattern(this.dataset.name);});});
+  scroll.querySelectorAll('.list-del-btn').forEach(function(btn){btn.addEventListener('click',function(){var n=this.dataset.name;if(confirm('"'+n+'" を削除しますか？'))deletePattern(n);});});
+}
+function openListPanel(){
+  if(currentName!=='未保存')document.getElementById('save-name-input').value=currentName;
+  renderList();document.getElementById('list-panel').classList.add('open');
+}
+function closeListPanel(){document.getElementById('list-panel').classList.remove('open');}
+document.getElementById('btn-list').addEventListener('click',openListPanel);
+document.getElementById('btn-list-close').addEventListener('click',closeListPanel);
+document.getElementById('list-panel').addEventListener('click',function(e){if(e.target===this)closeListPanel();});
+document.getElementById('list-save-btn').addEventListener('click',function(){
+  var name=document.getElementById('save-name-input').value;
+  if(!name||!name.trim()){alert('名前を入力してください');return;}
+  var exists=getSavedList().some(function(i){return i.name===name.trim();});
+  if(exists&&!confirm('"'+name.trim()+'" を上書きしますか？'))return;
+  savePattern(name);renderList();alert('"'+name.trim()+'" を保存しました！');
+});
+
+var newBtn=document.createElement('button');
+newBtn.textContent='＋ 新規作成';
+newBtn.style.cssText='background:#6a4a3a;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12px;white-space:nowrap;';
+newBtn.addEventListener('click',function(){
+  grid=makeGrid(20,20);ROWS=20;COLS=20;
+  document.getElementById('inp-r').value=20;document.getElementById('inp-c').value=20;
+  document.getElementById('save-name-input').value='';setCurrentName('未保存');draw();closeListPanel();
+});
+document.getElementById('list-new-area').insertBefore(newBtn,document.getElementById('save-name-input'));
+
+grid=makeGrid(ROWS,COLS);draw();
+</script>
+</body>
+</html>
